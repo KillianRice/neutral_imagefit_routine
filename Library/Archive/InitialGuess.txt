@@ -1,0 +1,51 @@
+% Determine fitting parameter initial guesses
+%%%%%%%-----------------------------------%%%%%%%%%%
+            % Filter with gaussian filter 
+            Zguess = conv2(OD_Image_Single,fspecial('gaussian',analyVar.gaussFiltAmp,analyVar.gaussFiltSig),'same');
+
+            %Cloud center guess by filtering with guassian (same filter as in Zguess)
+            cntr = FastPeakFind(OD_Image_Single,analyVar.ampThreshold,fspecial('gaussian',analyVar.gaussFiltAmp,analyVar.gaussFiltSig));
+            [xCntr,yCntr] = deal(cntr(1),cntr(2));
+
+            % Initial amplitude guess is the largest value from filtered image
+            amplitudeBEC = OD_Image_Single(xCntr,yCntr);
+            amplitude    = amplitudeBEC*analyVar.ampBimodalGuess;
+
+            % Reparameterized width guesses
+            betaSigX = indivDataset{basenameNum}.sigParamAtom(k);
+            betaSigY = indivDataset{basenameNum}.sigParamAtom(k);
+            sigX_BEC = cutAtomNumRow/indivDataset{basenameNum}.sigBECParamAtom(k);
+            sigY_BEC = cutAtomNumCol/indivDataset{basenameNum}.sigBECParamAtom(k);
+
+            % Find average value in the corners (size determined by analyVar.NoiseNumVec)
+            averageYLowXLow   = sum(sum(Zguess(1:analyVar.NoiseNumVec,1:analyVar.NoiseNumVec)))/analyVar.NoiseNumVec^2;
+            averageYLowXHigh  = sum(sum(Zguess(1:analyVar.NoiseNumVec,...
+                cutAtomNumRow - analyVar.NoiseNumVec:cutAtomNumRow)))/analyVar.NoiseNumVec^2;
+            averageYHighXLow  = sum(sum(Zguess(cutAtomNumCol - analyVar.NoiseNumVec:cutAtomNumCol,...
+                1:analyVar.NoiseNumVec)))/analyVar.NoiseNumVec^2;
+            averageYHighXHigh = sum(sum(Zguess(cutAtomNumCol - analyVar.NoiseNumVec:cutAtomNumCol,...
+                cutAtomNumRow - analyVar.NoiseNumVec:cutAtomNumRow)))/analyVar.NoiseNumVec^2;
+            % Estimate image slope from averaged element values in the corners of the image
+            % Used in fitting to compensate for image not being perpendicular to camera.
+            Offset = (averageYLowXLow + averageYLowXHigh + averageYHighXLow + averageYHighXHigh)/4 ;
+            SlopeX = ((averageYLowXHigh + averageYHighXHigh) - (averageYLowXLow + averageYHighXLow))/(2*cutAtomNumRow);
+            SlopeY = ((averageYHighXLow + averageYHighXHigh) - (averageYLowXLow + averageYLowXHigh))/(2*cutAtomNumCol);
+%%%%%%%-----------------------------------%%%%%%%%%%
+
+% Save initial guess and reparameterize
+%%%%%%%-----------------------------------%%%%%%%%%%
+            % InitialConditions used as initial guesses in non-linear fitting
+            if analyVar.BECfit == 0;
+                InitGuess = [amplitude, betaSigX, betaSigY, xCntr, yCntr, Offset, SlopeX, SlopeY, amplitudeBEC, sigX_BEC, sigY_BEC];
+                % Take log of some variables to enfore positivity constraint
+                posConstr  = [10 11]; % Variables that are constrained to be >0 by taking log
+                betaConstr = [2 3];   % Thermal widths should be larger than BEC widths
+                InitGuess(posConstr) = log(InitGuess(posConstr));
+
+            elseif analyVar.BECfit == 1;
+                InitGuess = [amplitude, sigX_BEC, sigY_BEC, xCntr, yCntr, Offset, SlopeX, SlopeY];
+                % Take log of some variables to enfore positivity constraint
+                posConstr = [2 3]; % Variables that are constrained to be >0 by taking log
+                InitGuess(posConstr) = log(InitGuess(posConstr));
+            end
+%%%%%%%-----------------------------------%%%%%%%%%%

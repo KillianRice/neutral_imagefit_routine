@@ -1,0 +1,45 @@
+%         
+%         %%%true software binning
+%         rawImageAtom = zeros(floor(size(roiImageAtom)/analyVar.softwareBinSize));
+%         rawImageBack = zeros(floor(size(roiImageAtom)/analyVar.softwareBinSize));
+%         if analyVar.softwareBinSize > 1
+%             for i = 1:size(roiImageAtom,2)/analyVar.softwareBinSize
+%                 for j = 1:size(roiImageAtom,1)/analyVar.softwareBinSize
+%                     rawImageAtom(i,j) = sum(sum(roiImageAtom(i*analyVar.softwareBinSize-(analyVar.softwareBinSize-1):i*analyVar.softwareBinSize,...
+%                         j*analyVar.softwareBinSize-(analyVar.softwareBinSize-1):j*analyVar.softwareBinSize)));
+%                     rawImageBack(i,j) = sum(sum(roiImageBack(i*analyVar.softwareBinSize-(analyVar.softwareBinSize-1):i*analyVar.softwareBinSize,...
+%                         j*analyVar.softwareBinSize-(analyVar.softwareBinSize-1):j*analyVar.softwareBinSize)));
+%                 end
+%             end
+%         else
+%             rawImageAtom = roiImageAtom;
+%             rawImageBack = roiImageBack;
+%         end
+%         
+%         Size of atoms matrix post-binning
+%         colFullAtom = size(rawImageAtom,1); rowFullAtom = size(rawImageAtom,2);
+%         colFullBack = size(rawImageBack,1); rowFullBack = size(rawImageBack,2);
+%         
+%         Scale Atom Image
+%         if analyVar.scaleBaseLevel == 1
+%             sumYLowXLow   = sum(sum(rawImageAtom(1:analyVar.numberForScale,1:analyVar.numberForScale)));
+%             sumYLowXHigh  = sum(sum(rawImageAtom(1:analyVar.numberForScale,rowFullAtom - analyVar.numberForScale:rowFullAtom)));
+%             sumYHighXLow  = sum(sum(rawImageAtom(colFullAtom - analyVar.numberForScale:colFullAtom,1:analyVar.numberForScale)));
+%             sumYHighXHigh = sum(sum(rawImageAtom(colFullAtom - analyVar.numberForScale:colFullAtom,rowFullAtom - analyVar.numberForScale:rowFullAtom)));
+%             baseLevelAtom = sumYLowXLow + sumYLowXHigh + sumYHighXLow + sumYHighXHigh;
+%             
+%             sumYLowXLow   = sum(sum(rawImageBack(1:analyVar.numberForScale,1:analyVar.numberForScale)));
+%             sumYLowXHigh  = sum(sum(rawImageBack(1:analyVar.numberForScale,rowFullBack - analyVar.numberForScale:rowFullBack)));
+%             sumYHighXLow  = sum(sum(rawImageBack(colFullBack - analyVar.numberForScale:colFullBack,1:analyVar.numberForScale)));
+%             sumYHighXHigh = sum(sum(rawImageBack(colFullBack - analyVar.numberForScale:colFullBack,rowFullBack - analyVar.numberForScale:rowFullBack)));
+%             baseLevelBack = sumYLowXLow + sumYLowXHigh + sumYHighXLow + sumYHighXHigh;
+%             
+%             Scaling
+%             rawImageAtom  = rawImageAtom*baseLevelBack/baseLevelAtom;
+%         end %of scaleBaseLevel
+%         
+%         %%%Cut edges of data by analyVar.cutBorders, make double to do log below
+%         cutImageAtom = double(rawImageAtom((analyVar.cutBorders + 1):(size(rawImageAtom,1) - analyVar.cutBorders),...
+%             (analyVar.cutBorders + 1):(size(rawImageAtom,2) - analyVar.cutBorders)));        
+%         cutImageBack = double(rawImageBack((analyVar.cutBorders + 1):(size(rawImageBack,1) - analyVar.cutBorders),...
+%             (analyVar.cutBorders + 1):(size(rawImageBack,2) - analyVar.cutBorders)));

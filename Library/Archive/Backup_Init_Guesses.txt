@@ -1,0 +1,62 @@
+Fugacityfit     = 1; % 1 will fit the thermal part with Fugacityfit and 0 with Gaussian fit
+BECfit          = 0; % 1 will use TF function to fit BEC...only on first pass...not on residuals
+BECfuncFit      = 0; % 1 means Fit BEC part to the BEC function; 0 means Fit BEC part to the Gaussian function
+
+% From analysisVariables
+% centerFindBinLimit = 5; % Limit to determine whether further binning is required to find the cloud center
+% centerFindBinSize  = 4; % Bin size for finding the position of the cloud
+% centerFor1DSlice   = 0; % For plotting the 1-D fits through cloud,1 means take center through which the slice...
+%                         %   goes as your center guesses, 0 means take it as the center of the gaussian fit.       
+
+
+	   % Trying to find center by filtering and taking BEC amp as highest
+        % then thermal amp as 50% of BEC amp
+%         Zguess = filter2(ones(analyVar.guessSmoothSize),OD_Image_Single(:,:))...
+%             /analyVar.guessSmoothSize^2; %atom-back, smoothed lots for finding guesses
+%         Zguess3avg = zeros(size(Zguess));
+%         for ZguessColumn = 1:size(Zguess3avg,2)
+%             if ZguessColumn == 1
+%                 Zguess3avg(:,ZguessColumn) = sum([Zguess(:,ZguessColumn) Zguess(:,ZguessColumn + 1)],2)./2;
+%             elseif ZguessColumn == size(Zguess3avg,1)
+%                 Zguess3avg(:,ZguessColumn) = sum([Zguess(:,ZguessColumn) Zguess(:,ZguessColumn - 1)],2)./2;
+%             else
+%                 Zguess3avg(:,ZguessColumn) = sum([Zguess(:,ZguessColumn) Zguess(:,ZguessColumn + 1) Zguess(:,ZguessColumn - 1)],2)./3;
+%             end
+%         end
+%         
+%         Find the subscripts of the maximum value
+%         maxAmpGuess = max(max(Zguess3avg));
+%         [yOffsetH,xOffsetH] = ind2sub(size(Zguess3avg),find(Zguess3avg == maxAmpGuess));
+%         
+%         %this will give trouble if slope is too big
+%         amplitude = (Zguess3avg(yOffsetH,xOffsetH + 2) + Zguess3avg(yOffsetH,xOffsetH - 2))/(2*maxAmpGuess)*max(max(Zguess)); 
+%         
+%         if indivDataset{basenamenumber}.BECamplitudeParameterAtom(k) == 100
+%             this will give trouble if slope is too big
+%             amplitudeBEC = (1 - (Zguess3avg(yOffsetH,xOffsetH + 2) + Zguess3avg(yOffsetH,xOffsetH - 2))/(2*maxAmpGuess))*max(max(Zguess)); 
+%         else  
+%             %this will give trouble if slope is too big
+%             amplitudeBEC = (indivDataset{basenamenumber}.BECamplitudeParameterAtom(k)...
+%                           - (Zguess3avg(yOffsetH,xOffsetH + 2) + Zguess3avg(yOffsetH,xOffsetH - 2))/2/maxAmpGuess)*max(max(Zguess)); 
+%         end
+%         
+%         bin by analyVar.centerFindBinSize and choose max to find cloud center
+%         if analyVar.softwareBinSize <= analyVar.centerFindBinLimit
+%             bin by at least 4 because binning was low to begin with
+%             centerFindBinSize = analyVar.centerFindBinSize; 
+%             ZguessBinned = zeros(floor(size(Zguess)/centerFindBinSize));
+%             for i=1:size(Zguess,1)/centerFindBinSize
+%                 for j=1:size(Zguess,2)/centerFindBinSize
+%                     ZguessBinned(i,j) = sum(sum(Zguess(i*centerFindBinSize-(centerFindBinSize-1):i*centerFindBinSize,...
+%                                                        j*centerFindBinSize-(centerFindBinSize-1):j*centerFindBinSize)));
+%                 end
+%             end
+%         else
+%             bin by 1 is sufficient in this case because binning was already pretty high.
+%             centerFindBinSize = 1; 
+%             ZguessBinned = Zguess;
+%         end
+%                
+%         % Guess for x and y position of cloud and multiply by bin size to find subscripts in Zguess
+%         [yOffset,xOffset] = ind2sub(size(ZguessBinned),find(ZguessBinned == max(max(ZguessBinned))));
+%         yOffset = yOffset*centerFindBinSize; xOffset = xOffset*centerFindBinSize;
