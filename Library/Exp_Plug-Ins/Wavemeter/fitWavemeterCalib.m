@@ -18,12 +18,10 @@ function indivBatch = fitWavemeterCalib(analyVar, indivBatch)
 ind_var = indivBatch.imagevcoAtom;
 wavemeter = indivBatch.sigParamAtom;
 
-%Set any readings flagged as 1 (or spuriously low), to whatever number came before it.
-for i=1:length(wavemeter)
-    if wavemeter(i) < 21690
-        wavemeter(i) = wavemeter(i-1);
-    end
-end
+%Remove any readings flagged as 1 (or spuriously low)
+correctWavemeterReadings = wavemeter  > 21690;
+ind_var   = ind_var(correctWavemeterReadings);
+wavemeter = wavemeter(correctWavemeterReadings);
 
 % Calculate and display the fit coefficients
 format long
@@ -34,6 +32,6 @@ format short
 % Save old x-axis into a new variable so we don't lose it entirely
 indivBatch.rawimagevcoAtom = indivBatch.imagevcoAtom;
 
-% Convert indipendent variable to wavenumbers 
-indivBatch.imagevcoAtom = polyval(indivBatch.indCalib, ind_var);
+% Convert independent variable to wavenumbers 
+indivBatch.imagevcoAtom = polyval(indivBatch.indCalib, indivBatch.imagevcoAtom);
 end

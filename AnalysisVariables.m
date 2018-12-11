@@ -529,10 +529,12 @@ switch TimeOrDetune
         xDataLabel    = 'Wavenumber from 20776 [cm^{-1}]';
         xDataUnit     = 'V';
     case 'Wavemeter' % In development
-        funcDataScale = @(data) 30.*(data - 21698.46);
+        res1P1 = 21698.452;
+        funcDataScale = @(data) 299792458*1e-7.*(data - res1P1);
+        %funcDataScale = @(data) data;
         funcIndCalib  = @(analyVar, indivBatch) fitWavemeterCalib(analyVar, indivBatch);
-        xDataLabel    = 'Detuning from 21698.43 [GHz]';
-        %xDataLabel    = 'Wavenumbers from 21698.43 [cm^{-1}]';
+        xDataLabel    = sprintf('Detuning from %g [GHz]', res1P1);
+        %xDataLabel    = 'Wavenumbers from 21698.452 [cm^{-1}]';
         xDataUnit     = 'GHz';
     otherwise
         error('Invalid selection for variable: TimeOrDetune. Please check the assignment.')
@@ -553,9 +555,8 @@ uniqScanList = unique(meanListVar,'stable'); % Unique values between all scans (
 % Position of each occurence of unique value in meanListVar (sorted as uniqListVar). This finds each scan with similar 
 % identifying variables andreturns the indices of all similar scans into a cell for each unique variable.
 posOccurUniqVar = arrayfun(@(x) find(meanListVar == x),uniqScanList,'UniformOutput',0);
-% Define precision to compare independent variables to (helps eliminate errors from comparing floating point
-% number) 
-compPrec = 1e6; % Will round numbers to the 6th decimal place
+% Define precision to compare independent variables to (helps eliminate errors from comparing floating point number) 
+compPrec = 1e7; % Will round numbers to the 7th decimal place
       
 %% Create structure of variables
 %%-----------------------------------------------------------------------%%
