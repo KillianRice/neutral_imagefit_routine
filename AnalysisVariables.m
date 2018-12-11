@@ -29,7 +29,7 @@ quickFit = 0;     % 1 to limit background evaluations, 0 for no limit.
 % EXPERIMENTAL OPTIONS AND SETTINGS
 %%-----------------------------------------------------------------------%%
 sampleType     = 'Thermal';  % Options are Thermal, BEC, or Lattice
-isotope        = 86; % Isotope mass used to select applicable models for fitting. Options are 84, 86, or 88 (87 not currently supported)
+isotope        = 87; % Isotope mass used to select applicable models for fitting. Options are 84, 86, or 88 (87 not currently supported)
 imgDetune      = 0;  % image beam detuning in Hz (as of 9/17/2014)
 pureSample     = 0;  % Flags whether BEC samples have a thermal fraction present or not (ignored for Thermal and Lattice samples)
 winToFit       = {'Central'}; % Specify which windows to fit, this generates the vector LatticeAxesFit
@@ -38,8 +38,8 @@ CameraMag      = 1;  % Currently can do 1x or 4x magnification (input 1 or 4)
 CCDbinning     = 1;  % Number of pixels binned when first recording data
 
 % Control the independent data
-applyIndCalib  = 0;      % Boolean to control whether a calibration function is applied to the independent variable, if true a function must be defined 
-TimeOrDetune   = 'Detuning'; % Named for (dumb) historical reasons but this controls the presentation of the X-axis on plots
+applyIndCalib  = 1;      % Boolean to control whether a calibration function is applied to the independent variable, if true a function must be defined 
+TimeOrDetune   = 'Wavemeter'; % Named for (dumb) historical reasons but this controls the presentation of the X-axis on plots
 % Valid options are {Time, Detuning, Bragg, 3P1 Detuning, Voltage, Offset Lock Detuning, Wavemeter} Line 431 to modify these properties
 
 %% PARAMETER EVALUATION AND PLOTTING FLAGS
@@ -529,10 +529,11 @@ switch TimeOrDetune
         xDataLabel    = 'Wavenumber from 20776 [cm^{-1}]';
         xDataUnit     = 'V';
     case 'Wavemeter' % In development
-        funcDataScale = @(data) data - 21698.46;
+        funcDataScale = @(data) 30.*(data - 21698.46);
         funcIndCalib  = @(analyVar, indivBatch) fitWavemeterCalib(analyVar, indivBatch);
-        xDataLabel    = 'Wavenumbers from 21698.43 [cm^{-1}]';
-        xDataUnit     = 'cm^-1';
+        xDataLabel    = 'Detuning from 21698.43 [GHz]';
+        %xDataLabel    = 'Wavenumbers from 21698.43 [cm^{-1}]';
+        xDataUnit     = 'GHz';
     otherwise
         error('Invalid selection for variable: TimeOrDetune. Please check the assignment.')
 end
@@ -554,7 +555,7 @@ uniqScanList = unique(meanListVar,'stable'); % Unique values between all scans (
 posOccurUniqVar = arrayfun(@(x) find(meanListVar == x),uniqScanList,'UniformOutput',0);
 % Define precision to compare independent variables to (helps eliminate errors from comparing floating point
 % number) 
-compPrec = 1e5; % Will round numbers to the 6th decimal place
+compPrec = 1e6; % Will round numbers to the 6th decimal place
       
 %% Create structure of variables
 %%-----------------------------------------------------------------------%%

@@ -65,7 +65,7 @@ for uniqScanIter = 1:length(analyVar.uniqScanList);
         %                  with the set of current batch file ind. variables
         % Look at help of intersect if this is unclear
         [~,idxSharedWithSim,idxSharedInBatch] = intersect(avgDataset{uniqScanIter}.simScanIndVar,...
-            double(int32(indivDataset{basenameNum}.imagevcoAtom*analyVar.compPrec))*1/analyVar.compPrec);
+            double(int64(indivDataset{basenameNum}.imagevcoAtom*analyVar.compPrec))*1/analyVar.compPrec);
         
         %% Compute trap frequency
         % Matrix containing the various measured pnts for each scan image
